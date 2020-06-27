@@ -15,6 +15,7 @@ public class P2PConsole {
         multicaster.start();
         multicaster.accessPP2PNetwork();
         multicaster.join();
+        multicaster.close();
 
         if(multicaster.getContactHost() != null){
             System.out.println(multicaster.getContactHost() + " -- Oh yeah!!!");
