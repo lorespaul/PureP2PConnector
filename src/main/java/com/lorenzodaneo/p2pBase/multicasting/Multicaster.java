@@ -103,6 +103,9 @@ public class Multicaster extends Thread {
 
     public String parsePacket(String packet, PP2PPacketEnum stringPart){
         String[] firstSplit = packet.split(_PROTOCOL_DIVIDER);
+        if(firstSplit.length != 2)
+            return packet;
+
         String[] secondSplit = firstSplit[1].split(_SLASH);
         switch (stringPart){
             case PROTOCOL: return firstSplit[0];
@@ -136,7 +139,7 @@ public class Multicaster extends Thread {
                 String received = new String(packet.getData(), 0, packet.getLength());
 
                 if(getLocalAddress() != null && !getLocalAddress().equals(parsePacket(received, PP2PPacketEnum.ADDRESS))){
-
+                    System.out.print(received);
                     if (parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
                         System.out.println("Received message request: " + received);
                         publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE, PP2PMessage.RETURN_NET_INFO, "info");
