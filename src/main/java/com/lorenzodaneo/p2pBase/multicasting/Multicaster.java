@@ -161,7 +161,7 @@ public class Multicaster extends Thread {
         for (NetworkInterface net : niList){
             for (InterfaceAddress addr : net.getInterfaceAddresses()){
                 String ip = addr.getAddress().getHostAddress();
-                if(ip.startsWith("192")){
+                if(ip.startsWith("192.168.0")){
                     return ip;
                 }
             }
