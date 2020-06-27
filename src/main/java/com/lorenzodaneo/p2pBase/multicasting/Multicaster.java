@@ -85,10 +85,11 @@ public class Multicaster extends Thread {
                 }
                 String received = new String(packet.getData(), 0, packet.getLength());
                 if (received.equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
-                    System.out.println("Received message: " + received);
+                    System.out.println("Received message request: " + received);
                     String currentIp = getLocalAddress();// getResearcher().getWanIp();
                     publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage() + _PROTOCOL_DIVIDER + currentIp);
                 } else if(starting && received.startsWith(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage())){
+                    System.out.println("Received message response: " + received);
                     String[] splitResponse = received.split(_PROTOCOL_DIVIDER);
                     if(splitResponse.length >= 2)
                         contactHost = received.split(_PROTOCOL_DIVIDER)[1];
