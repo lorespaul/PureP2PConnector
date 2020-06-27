@@ -115,21 +115,19 @@ public class Multicaster extends Thread {
                 }
                 break;
         }
-        return null;
+        return "";
     }
 
 
     public void run(){
         try {
+            getSocket().joinGroup(_MULTICAST_ADDRESS);
             while (true) {
                 byte[] buf = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 try{
-                    getSocket().joinGroup(_MULTICAST_ADDRESS);
                     getSocket().receive(packet);
-                    getSocket().leaveGroup(_MULTICAST_ADDRESS);
                 } catch (SocketTimeoutException e){
-                    getSocket().leaveGroup(_MULTICAST_ADDRESS);
                     if(timeoutCounter++ == 10 && starting){
                         break;
                     }
@@ -141,8 +139,7 @@ public class Multicaster extends Thread {
 
                     if (parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
                         System.out.println("Received message request: " + received);
-                        Thread.sleep(2000);
-                        publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE, PP2PMessage.RETURN_NET_INFO, "infooooo");
+                        publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE, PP2PMessage.RETURN_NET_INFO, "info");
                     } else if(starting && parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage())){
                         System.out.println("Received message response: " + received);
                         contactHost = parsePacket(received, PP2PPacketEnum.ADDRESS);
@@ -151,7 +148,8 @@ public class Multicaster extends Thread {
 
                 }
             }
-        } catch (IOException | InterruptedException e) {
+            getSocket().leaveGroup(_MULTICAST_ADDRESS);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
