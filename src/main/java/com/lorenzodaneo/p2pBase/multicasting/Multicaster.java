@@ -80,11 +80,11 @@ public class Multicaster extends Thread {
     }
 
 
-    public void publishMessage(DiscoveryMessage discovery, PP2PMessage pp2p) {
+    private void publishMessage(DiscoveryMessage discovery, PP2PMessage pp2p) {
         publishMessage(discovery, pp2p, null);
     }
 
-    public void publishMessage(DiscoveryMessage discovery, PP2PMessage pp2p, String message) {
+    private void publishMessage(DiscoveryMessage discovery, PP2PMessage pp2p, String message) {
         try {
             String localAddress = getLocalAddress();
             String send = _PP2P + _PROTOCOL_DIVIDER + discovery.getMessage() + _SLASH + localAddress + _SLASH + pp2p;
