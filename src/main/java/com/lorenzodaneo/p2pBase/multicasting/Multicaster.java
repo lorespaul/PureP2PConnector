@@ -94,6 +94,7 @@ public class Multicaster extends Thread {
             byte[] buffer = send.getBytes();
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, _MULTICAST_ADDRESS, _MULTICAST_PORT);
             getSocket().send(packet);
+            System.out.println("Message sent: " + send);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -127,8 +128,7 @@ public class Multicaster extends Thread {
                 try{
                     getSocket().receive(packet);
                 } catch (SocketTimeoutException e){
-                    timeoutCounter++;
-                    if(timeoutCounter == 10 && starting){
+                    if(timeoutCounter++ == 10 && starting){
                         break;
                     }
                     continue;
