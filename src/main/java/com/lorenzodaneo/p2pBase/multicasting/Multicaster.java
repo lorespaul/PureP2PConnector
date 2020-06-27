@@ -129,6 +129,7 @@ public class Multicaster extends Thread {
                     getSocket().receive(packet);
                     getSocket().leaveGroup(_MULTICAST_ADDRESS);
                 } catch (SocketTimeoutException e){
+                    getSocket().leaveGroup(_MULTICAST_ADDRESS);
                     if(timeoutCounter++ == 10 && starting){
                         break;
                     }
