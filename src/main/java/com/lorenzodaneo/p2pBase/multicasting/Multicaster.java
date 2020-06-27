@@ -59,16 +59,17 @@ public class Multicaster extends Thread {
     }
 
     private String contactHost = null;
-    private boolean starting = true;
+    private final boolean starting;
     private int timeoutCounter = 0;
 
 
-    public Multicaster() throws IOException {
+    public Multicaster(boolean starting) throws IOException {
         setSocket(new MulticastSocket(_MULTICAST_PORT));
         getSocket().setTimeToLive(255);
         getSocket().setSoTimeout(5000);
 
         setResearcher(new ExternalAddressResearcher());
+        this.starting = starting;
     }
 
 
@@ -131,14 +132,18 @@ public class Multicaster extends Thread {
                     continue;
                 }
                 String received = new String(packet.getData(), 0, packet.getLength());
-                if (parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
-                    System.out.println("Received message request: " + received);
-                    publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE, PP2PMessage.RETURN_NET_INFO);
-                } else if(starting && parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage())){
-                    System.out.println("Received message response: " + received);
-                    contactHost = parsePacket(received, PP2PPacketEnum.ADDRESS);
-                    starting = false;
-                    break;
+
+                if(getLocalAddress() != null && !getLocalAddress().equals(parsePacket(received, PP2PPacketEnum.ADDRESS))){
+
+                    if (parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
+                        System.out.println("Received message request: " + received);
+                        publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE, PP2PMessage.RETURN_NET_INFO, "infooooo");
+                    } else if(starting && parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage())){
+                        System.out.println("Received message response: " + received);
+                        contactHost = parsePacket(received, PP2PPacketEnum.ADDRESS);
+                        break;
+                    }
+
                 }
             }
             getSocket().leaveGroup(_MULTICAST_ADDRESS);
