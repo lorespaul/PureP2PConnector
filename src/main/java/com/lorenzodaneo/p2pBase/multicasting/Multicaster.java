@@ -121,12 +121,13 @@ public class Multicaster extends Thread {
 
     public void run(){
         try {
-            getSocket().joinGroup(_MULTICAST_ADDRESS);
             byte[] buf = new byte[1000];
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 try{
+                    getSocket().joinGroup(_MULTICAST_ADDRESS);
                     getSocket().receive(packet);
+                    getSocket().leaveGroup(_MULTICAST_ADDRESS);
                 } catch (SocketTimeoutException e){
                     if(timeoutCounter++ == 10 && starting){
                         break;
@@ -149,7 +150,6 @@ public class Multicaster extends Thread {
 
                 }
             }
-            getSocket().leaveGroup(_MULTICAST_ADDRESS);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
