@@ -159,9 +159,16 @@ public class Multicaster extends Thread {
     private String getLocalAddress() throws SocketException {
         List<NetworkInterface> niList = Collections.list(NetworkInterface.getNetworkInterfaces());
         for (NetworkInterface net : niList){
-            for (InterfaceAddress addr : net.getInterfaceAddresses()){
-                String ip = addr.getAddress().getHostAddress();
-                if(ip.startsWith("192.168.0")){
+            if(net.isLoopback() || !net.isUp())
+                continue;
+
+            for (InterfaceAddress address : net.getInterfaceAddresses()){
+
+                if (address.getBroadcast() == null && address.getNetworkPrefixLength() != 8)
+                    continue;
+
+                String ip = address.getAddress().getHostAddress();
+                if(ip != null){
                     return ip;
                 }
             }
