@@ -12,7 +12,7 @@ public class P2PConsole {
 
     public static void main(String[] argv) throws IOException, InterruptedException {
         multicaster = new Multicaster();
-        multicaster.publishMessage(DiscoveryMessage.MULTICASTING_REQUEST.getMessage());
+        multicaster.accessPP2PNetwork();
         multicaster.start();
         multicaster.join();
 

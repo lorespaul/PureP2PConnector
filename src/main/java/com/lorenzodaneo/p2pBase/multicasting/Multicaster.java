@@ -1,6 +1,7 @@
 package com.lorenzodaneo.p2pBase.multicasting;
 
 import com.lorenzodaneo.p2pBase.messages.DiscoveryMessage;
+import com.lorenzodaneo.p2pBase.messages.PP2PMessage;
 
 import java.io.IOException;
 import java.net.*;
@@ -10,6 +11,17 @@ public class Multicaster extends Thread {
     private static InetAddress _MULTICAST_ADDRESS = null;
     private static final int _MULTICAST_PORT = 4446;
     private static final String _PROTOCOL_DIVIDER = "://";
+    private static final String _SLASH = "/";
+    private static final String _PP2P = "pp2p";
+
+
+    private static enum PP2PPacketEnum{
+        PROTOCOL,
+        DISCOVERY,
+        ADDRESS,
+        PP2P,
+        MESSAGE
+    }
 
     static {
         try {
@@ -59,13 +71,48 @@ public class Multicaster extends Thread {
         setResearcher(new ExternalAddressResearcher());
     }
 
-    public void publishMessage(String message) throws IOException {
-        byte[] buffer = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, _MULTICAST_ADDRESS, _MULTICAST_PORT);
-        getSocket().send(packet);
+
+    public void accessPP2PNetwork(){
+        publishMessage(DiscoveryMessage.MULTICASTING_REQUEST, PP2PMessage.GET_NET_INFO);
     }
 
 
+    public void publishMessage(DiscoveryMessage discovery, PP2PMessage pp2p) {
+        publishMessage(discovery, pp2p, null);
+    }
+
+    public void publishMessage(DiscoveryMessage discovery, PP2PMessage pp2p, String message) {
+        try {
+            String localAddress = getLocalAddress();
+            String send = _PP2P + _PROTOCOL_DIVIDER + discovery.getMessage() + _SLASH + localAddress + _SLASH + pp2p;
+            if(message != null){
+                send += _SLASH + message;
+            }
+            byte[] buffer = send.getBytes();
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, _MULTICAST_ADDRESS, _MULTICAST_PORT);
+            getSocket().send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public String parsePacket(String packet, PP2PPacketEnum stringPart){
+        String[] firstSplit = packet.split(_PROTOCOL_DIVIDER);
+        String[] secondSplit = firstSplit[1].split(_SLASH);
+        switch (stringPart){
+            case PROTOCOL: return firstSplit[0];
+            case DISCOVERY: return secondSplit[0];
+            case ADDRESS: return secondSplit[1];
+            case PP2P: return secondSplit[2];
+            case MESSAGE:
+                if(secondSplit.length == 4){
+                    return secondSplit[3];
+                }
+                break;
+        }
+        return null;
+    }
 
 
     public void run(){
@@ -84,15 +131,12 @@ public class Multicaster extends Thread {
                     continue;
                 }
                 String received = new String(packet.getData(), 0, packet.getLength());
-                if (received.equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
+                if (parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_REQUEST.getMessage())) {
                     System.out.println("Received message request: " + received);
-                    String currentIp = getLocalAddress();// getResearcher().getWanIp();
-                    publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage() + _PROTOCOL_DIVIDER + currentIp);
-                } else if(starting && received.startsWith(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage())){
+                    publishMessage(DiscoveryMessage.MULTICASTING_RESPONSE, PP2PMessage.RETURN_NET_INFO);
+                } else if(starting && parsePacket(received, PP2PPacketEnum.DISCOVERY).equals(DiscoveryMessage.MULTICASTING_RESPONSE.getMessage())){
                     System.out.println("Received message response: " + received);
-                    String[] splitResponse = received.split(_PROTOCOL_DIVIDER);
-                    if(splitResponse.length >= 2)
-                        contactHost = received.split(_PROTOCOL_DIVIDER)[1];
+                    contactHost = parsePacket(received, PP2PPacketEnum.ADDRESS);
                     starting = false;
                     break;
                 }
