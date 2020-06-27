@@ -5,6 +5,8 @@ import com.lorenzodaneo.p2pBase.messages.PP2PMessage;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Collections;
+import java.util.List;
 
 public class Multicaster extends Thread {
 
@@ -155,8 +157,8 @@ public class Multicaster extends Thread {
 
 
     private String getLocalAddress() throws SocketException {
-        while (NetworkInterface.getNetworkInterfaces().hasMoreElements()){
-            NetworkInterface net = NetworkInterface.getNetworkInterfaces().nextElement();
+        List<NetworkInterface> niList = Collections.list(NetworkInterface.getNetworkInterfaces());
+        for (NetworkInterface net : niList){
             for (InterfaceAddress addr : net.getInterfaceAddresses()){
                 String ip = addr.getAddress().getHostAddress();
                 if(ip.startsWith("192")){

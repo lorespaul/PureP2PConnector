@@ -12,8 +12,8 @@ public class P2PConsole {
 
     public static void main(String[] argv) throws IOException, InterruptedException {
         multicaster = new Multicaster(true);
-        multicaster.accessPP2PNetwork();
         multicaster.start();
+        multicaster.accessPP2PNetwork();
         multicaster.join();
 
         if(multicaster.getContactHost() != null){
