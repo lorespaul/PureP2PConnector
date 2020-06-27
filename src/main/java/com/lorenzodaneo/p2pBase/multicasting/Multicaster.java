@@ -121,8 +121,8 @@ public class Multicaster extends Thread {
 
     public void run(){
         try {
-            byte[] buf = new byte[1000];
             while (true) {
+                byte[] buf = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 try{
                     getSocket().joinGroup(_MULTICAST_ADDRESS);
