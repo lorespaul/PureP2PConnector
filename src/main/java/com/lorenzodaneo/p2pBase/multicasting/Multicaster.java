@@ -27,7 +27,7 @@ public class Multicaster extends Thread {
 
     static {
         try {
-            _MULTICAST_ADDRESS = InetAddress.getByName("230.0.0.0");
+            _MULTICAST_ADDRESS = InetAddress.getByName("224.1.0.1");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
